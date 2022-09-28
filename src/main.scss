@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply font-sans text-lg text-center m-6;
+};
+
+h1 {
+    @apply text-xl font-bold mt-1 mb-4;
+}
+
+code {
+    @apply p-4
+}
+
+.card {
+    @apply rounded-md shadow-md p-4 mb-4;
+}
