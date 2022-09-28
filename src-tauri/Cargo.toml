@@ -1,12 +1,12 @@
 [package]
-name = "tauri-template"
+name = "tauri-bevy-svelte-app"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "A Tauri App using Bevy & Svelte"
+authors = ["3rdDog"]
 license = ""
 repository = ""
-default-run = "tauri-template"
-edition = "2018"
+default-run = "tauri-bevy-svelte-app"
+edition = "2021"
 build = "src/build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -17,7 +17,9 @@ tauri-build = { version = "1.0", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.0", features = ["shell-open"] }
+tauri = { version = "1.1", features = ["shell-open"] }
+bevy = "0.8.1"
+crossbeam-channel = "0.5.6"
 
 [features]
 default = ["custom-protocol"]

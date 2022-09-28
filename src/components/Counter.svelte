@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { invoke } from '@tauri-apps/api/tauri'
 
   let count = 0
   onMount(() => {
-    const interval = setInterval(() => count++, 1000)
+    const interval = setInterval(async () => (count = await invoke('get_state')), 1000)
     return () => clearInterval(interval)
   })
 </script>

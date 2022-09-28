@@ -3,6 +3,13 @@
   windows_subsystem = "windows"
 )]
 
+pub mod game;
+
+use crate::game::counter::{increment_counter, send_counter, CounterValue};
+use crate::game::{get_state, BevyBridge, TauriBridge};
+use bevy::{app::ScheduleRunnerSettings, prelude::*, utils::Duration};
+use crossbeam_channel::bounded;
+use std::thread;
 use tauri::api::shell;
 use tauri::{
   AboutMetadata, CustomMenuItem, Manager, Menu, MenuEntry, MenuItem, Submenu, WindowBuilder,
@@ -10,10 +17,30 @@ use tauri::{
 };
 
 fn main() {
-  let ctx = tauri::generate_context!();
+  /*
+   * Start Bevy in a separate thread with a mpsc bridge between Bevy & Tauri
+   */
+  let (tx, rx) = bounded::<u32>(1000);
+  thread::spawn(move || {
+    App::new()
+      .insert_resource(ScheduleRunnerSettings::run_loop(Duration::from_secs_f64(
+        1.0,
+      )))
+      .add_plugins(MinimalPlugins)
+      .insert_resource(TauriBridge(tx))
+      .insert_resource(CounterValue::default())
+      .add_system(increment_counter)
+      .add_system(send_counter)
+      .run()
+  });
 
+  /*
+   * Start Tauri as usual
+   */
+  let ctx = tauri::generate_context!();
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![])
+    .manage(BevyBridge(rx))
+    .invoke_handler(tauri::generate_handler![get_state])
     .setup(|app| {
       let _window = WindowBuilder::new(app, "main", WindowUrl::default())
         .title("Tauri Svelte App")
