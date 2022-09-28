@@ -1,6 +1,9 @@
-# Tauri Svelte Template
+# Tauri Bevy Svelte App
+
+Experimenting with the integration of the Bevy game engine and a Tauri app using Svelte views.
 
 - **Tauri**
+- **Bevy**
 - **GitHub action** for cross-platform builds
 - **Svelte**
 - **Vite**
@@ -15,18 +18,21 @@
 ### Get started
 
 1. Install Node.js
-2. Install Rust
-3. Follow the [Tauri setup guide](https://tauri.studio/en/docs/get-started/intro)
-4. Run `npm install`
-5. Find and replace the text `tauri-template` and `Tauri Template`.
+2. Install Yarn
+3. Install Rust
+   . Follow the [Tauri setup guide](https://tauri.studio/en/docs/get-started/intro)
+4. Run `yarn` to install dependencies
+5. From the `src-tauri` folder, run `cargo check` to install dependencies
 
 ### Commands
-- `npm run dev`: Start app in dev mode
-- `npm run build`: Build
-- `npm run lint`: Lint
-- `npm run format`: Format
+
+- `yarn dev`: Start app in dev mode
+- `yarn build`: Build
+- `yarn lint`: Lint
+- `yarn format`: Format
 
 ### Release new version
+
 1. Update `CHANGELOG.md`
 2. Bump the version number in `src-tauri/Cargo.toml`
 3. Run `cargo check` to update `Cargo.lock`

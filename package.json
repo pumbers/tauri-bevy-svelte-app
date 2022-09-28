@@ -1,4 +1,11 @@
 {
+  "name": "tauri-bevy-svelte-app",
+  "version": "0.1.0",
+  "description": "Test app for integrating Tauri, Bevy & Svelte.",
+  "author": {
+    "name": "3rdDog"
+  },
+  "license": "MIT",
   "private": true,
   "scripts": {
     "tauri": "tauri",

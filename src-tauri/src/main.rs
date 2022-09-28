@@ -5,10 +5,10 @@
 
 pub mod game;
 
-use crate::game::counter::{increment_counter, send_counter, CounterValue};
-use crate::game::{get_state, BevyBridge, TauriBridge};
+use crate::game::counter::{increment_counter, reset_counter, send_counter, CounterValue};
+use crate::game::{BevyBridge, TauriBridge};
 use bevy::{app::ScheduleRunnerSettings, prelude::*, utils::Duration};
-use crossbeam_channel::bounded;
+use crossbeam_channel::{bounded, unbounded};
 use std::thread;
 use tauri::api::shell;
 use tauri::{
@@ -17,30 +17,28 @@ use tauri::{
 };
 
 fn main() {
-  /*
-   * Start Bevy in a separate thread with a mpsc bridge between Bevy & Tauri
-   */
-  let (tx, rx) = bounded::<u32>(1000);
+  // Start Bevy in a separate thread with mpsc bridges between Bevy & Tauri
+  let (tx_to_tauri, rx_from_bevy) = unbounded::<u32>();
+  let (tx_to_bevy, rx_from_tauri) = bounded::<()>(100);
+
   thread::spawn(move || {
     App::new()
       .insert_resource(ScheduleRunnerSettings::run_loop(Duration::from_secs_f64(
         1.0,
       )))
       .add_plugins(MinimalPlugins)
-      .insert_resource(TauriBridge(tx))
+      .insert_resource(TauriBridge(tx_to_tauri, rx_from_tauri))
       .insert_resource(CounterValue::default())
       .add_system(increment_counter)
       .add_system(send_counter)
       .run()
   });
 
-  /*
-   * Start Tauri as usual
-   */
+  // Start Tauri as usual
   let ctx = tauri::generate_context!();
   tauri::Builder::default()
-    .manage(BevyBridge(rx))
-    .invoke_handler(tauri::generate_handler![get_state])
+    .manage(BevyBridge(tx_to_bevy))
+    .invoke_handler(tauri::generate_handler![reset_counter])
     .setup(|app| {
       let _window = WindowBuilder::new(app, "main", WindowUrl::default())
         .title("Tauri Svelte App")
@@ -48,6 +46,22 @@ fn main() {
         .min_inner_size(400.0, 200.0)
         .build()
         .expect("Unable to create window");
+
+      // Add an event loop to listen for messages coming from Bevy and forward them to Svelte as events
+      tauri::async_runtime::spawn(async move {
+        loop {
+          match rx_from_bevy.try_iter().last() {
+            Some(payload) => {
+              _window
+                .emit("send_state", payload)
+                .expect("Event should be sent");
+            }
+            _ => {}
+          }
+          thread::sleep(Duration::from_millis(50));
+        }
+      });
+
       Ok(())
     })
     .menu(Menu::with_items([
